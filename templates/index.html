@@ -1,13 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Clipboard Image</title>
+    <title>Image Text Extraction</title>
 </head>
 <body>
-    <h1>Clipboard Image</h1>
-    <img src="{{ img_path }}" alt="Clipboard Image">
-    <h2>Extracted Text:</h2>
-    <p>{{ text }}</p>
+    <h2>Image Text Extraction</h2>
+
+    <form method="POST" action="/" enctype="multipart/form-data">
+        <input type="file" id="image" name="image">
+        <br>
+        <input type="submit" value="Extract Text">
+    </form>
+
+    {% if img_path %}
+        <h3>Image:</h3>
+        <img src="{{ img_path }}" alt="Uploaded Image">
+    {% endif %}
+
+    {% if text %}
+        <h3>Extracted Text:</h3>
+        <p>{{ text }}</p>
+    {% endif %}
+
+    {% if error %}
+        <p>Error: {{ error }}</p>
+    {% endif %}
 </body>
 </html>
-
