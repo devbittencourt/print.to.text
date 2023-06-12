@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from PIL import ImageGrab, Image
 import pytesseract
+import subprocess
 
 app = Flask(__name__)
 
@@ -12,7 +13,13 @@ def extract_text_from_image(img_path):
 
 @app.route('/')
 def show_image():
-    img = ImageGrab.grabclipboard()
+    try:
+        
+        subprocess.run(['xclip', '-selection', 'clipboard', '-t', 'image/png', '-o'], check=True, stdout=subprocess.PIPE)
+        img = ImageGrab.grabclipboard()
+    except subprocess.CalledProcessError:
+        img = None
+
     img_path = 'static/clipboard_image.png'
 
     if img is not None:
