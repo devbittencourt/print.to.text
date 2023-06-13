@@ -1,15 +1,16 @@
 from flask import Flask, render_template, request
 from PIL import ImageGrab, Image
-import pytesseract
+import easyocr
 import base64
 import os
 
 app = Flask(__name__)
 
-
 def extract_text_from_image(img_path):
+    reader = easyocr.Reader(['en'])
     img = Image.open(img_path)
-    text = pytesseract.image_to_string(img)
+    results = reader.readtext(img)
+    text = ' '.join([result[1] for result in results])
     return text
 
 @app.route('/', methods=['GET', 'POST'])
