@@ -10,8 +10,8 @@ def extract_text_from_image(img_path):
     reader = easyocr.Reader(['en'])
     img = Image.open(img_path)
     results = reader.readtext(img)
-    text = ' '.join([result[1] for result in results])
-    return text
+    return results
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -37,13 +37,16 @@ def home():
                 f.write(image_bytes)
 
             # Extrai o texto da imagem
-            extracted_text = extract_text_from_image(destination)
+            extracted_results = extract_text_from_image(destination)
+
+            # Formata o texto extraído
+            extracted_text = '\n'.join([result[1] for result in extracted_results])
 
             # Retorna uma mensagem de sucesso e o texto extraído
             return f'Imagem enviada com sucesso!\n\nTexto extraído:\n\n{extracted_text}'
 
-    # Renderiza o template HTML
-    return render_template('index.html')
+            # Renderiza o template HTML
+            return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
