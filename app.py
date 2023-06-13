@@ -25,7 +25,10 @@ def home():
             image_data = image_data.replace('data:image/png;base64,', '')
 
             # Decodifica a string em base64 para obter os dados binários da imagem
-            image_bytes = base64.b64decode(image_data)
+            try:
+                image_bytes = base64.b64decode(image_data)
+            except Exception as e:
+                return f'Erro ao decodificar a imagem: {str(e)}'
 
             # Define o caminho de destino do arquivo
             upload_folder = 'static'
@@ -33,20 +36,24 @@ def home():
             destination = os.path.join(upload_folder, filename)
 
             # Salva a imagem no caminho de destino
-            with open(destination, 'wb') as f:
-                f.write(image_bytes)
+            try:
+                with open(destination, 'wb') as f:
+                    f.write(image_bytes)
+            except Exception as e:
+                return f'Erro ao salvar a imagem: {str(e)}'
 
             # Extrai o texto da imagem
-            extracted_results = extract_text_from_image(destination)
-
-            # Formata o texto extraído
-            extracted_text = '\n'.join([result[1] for result in extracted_results])
+            try:
+                extracted_results = extract_text_from_image(destination)
+                extracted_text = '\n'.join([result[1] for result in extracted_results])
+            except Exception as e:
+                return f'Erro ao extrair texto da imagem: {str(e)}'
 
             # Retorna uma mensagem de sucesso e o texto extraído
             return f'Imagem enviada com sucesso!\n\nTexto extraído:\n\n{extracted_text}'
 
-            # Renderiza o template HTML
-            return render_template('index.html')
+    # Renderiza o template HTML
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
