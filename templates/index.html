@@ -1,12 +1,112 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Clipboard Image</title>
+    <title>Upload de Imagem</title>
 </head>
 <body>
-    <h1>Clipboard Image</h1>
-    <img src="{{ img_path }}" alt="Clipboard Image">
-    <h2>Extracted Text:</h2>
-    <p>{{ text }}</p>
+    <h1>Upload de Imagem</h1>
+    <input type="file" id="image-input" style="display: none;">
+    <img id="preview" style="max-width: 300px; max-height: 300px;">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var imageInput = document.getElementById('image-input');
+            var preview = document.getElementById('preview');
+
+            // Evento de colar imagem
+            document.addEventListener('paste', function (e) {
+                var items = e.clipboardData.items;
+
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        var blob = items[i].getAsFile();
+                        var reader = new FileReader();
+
+                        reader.onload = function (event) {
+                            // Exibe a imagem no elemento de visualização
+                            preview.src = event.target.result;
+                            
+                            // Converte a imagem para base64
+                            var canvas = document.createElement('canvas');
+                            var ctx = canvas.getContext('2d');
+                            var image = new Image();
+
+                            image.onload = function () {
+                                canvas.width = image.width;
+                                canvas.height = image.height;
+                                ctx.drawImage(image, 0, 0);
+                                var base64Data = canvas.toDataURL('image/png');
+                                
+                                // Envia a imagem para o servidor
+                                fetch('/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: 'image=' + encodeURIComponent(base64Data)
+                                })
+                                    .then(function (response) {
+                                        if (response.ok) {
+                                            alert('Imagem enviada com sucesso!');
+                                        } else {
+                                            alert('Ocorreu um erro ao enviar a imagem.');
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        alert('Ocorreu um erro ao enviar a imagem.');
+                                        console.error(error);
+                                    });
+                            };
+
+                            image.src = event.target.result;
+                        };
+
+                        reader.readAsDataURL(blob);
+                        break;
+                    }
+                }
+            });
+
+            // Evento de clique para abrir o seletor de arquivo
+            preview.addEventListener('click', function () {
+                imageInput.click();
+            });
+
+            // Evento de seleção de arquivo
+            imageInput.addEventListener('change', function (e) {
+                var file = e.target.files[0];
+                var reader = new FileReader();
+
+                reader.onload = function (event) {
+                    // Exibe a imagem no elemento de visualização
+                    preview.src = event.target.result;
+                    
+                    // Converte a imagem para base64
+                    var base64Data = event.target.result.replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+                    
+                    // Envia a imagem para o servidor
+                    fetch('/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: 'image=' + encodeURIComponent(base64Data)
+                    })
+                        .then(function (response) {
+                            if (response.ok) {
+                                alert('Imagem enviada com sucesso!');
+                            } else {
+                                alert('Ocorreu um erro ao enviar a imagem.');
+                            }
+                        })
+                        .catch(function (error) {
+                            alert('Ocorreu um erro ao enviar a imagem.');
+                            console.error(error);
+                        });
+                };
+
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
 </body>
 </html>
