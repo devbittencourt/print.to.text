@@ -1,12 +1,12 @@
-import os
+from flask import Flask, request, jsonify, render_template
 import cv2
-import keras_ocr
-from flask import Flask, request
+from keras_ocr import pipeline
 
-# Configurar Flask
 app = Flask(__name__)
 
-# Definir rota para o endpoint
+# Cria uma instância do pipeline fora da função para reutilização
+pipeline_instance = pipeline.Pipeline()
+
 @app.route('/', methods=['GET', 'POST'])
 def process_image():
     if request.method == 'POST':
@@ -14,28 +14,20 @@ def process_image():
         if 'image' not in request.files:
             return jsonify({'error': 'Nenhum arquivo de imagem fornecido.'})
 
+        image = request.files['image']
+        
+        # Lê a imagem a partir do arquivo e converte para RGB
+        image_data = cv2.cvtColor(cv2.imdecode(np.frombuffer(image.read(), np.uint8), -1), cv2.COLOR_BGR2RGB)
 
-    # Carregar o modelo OCR
-    pipeline = keras_ocr.pipeline.Pipeline()
+        # Utiliza o Keras-OCR pipeline para realizar a leitura da imagem e extrair o texto
+        result = pipeline_instance.recognize([image_data])
 
-    # Ler a imagem e converter para RGB
-    image = request.files['image'].read()
-    image = cv2.imdecode(np.frombuffer(image, np.uint8), cv2.IMREAD_COLOR)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # Retorna o texto extraído como resposta em formato JSON
+        return jsonify({'text': result[0]})
 
-    # Processar a imagem para extrair o texto
-    images = [image]
-    images = [tools.read(image) for image in images]
-    predictions = pipeline.recognize(images)
-
-    # Extrair o texto das predições
-    text = [text for text in predictions[0][0] if text]
-
-    return '\n'.join(text)
+    elif request.method == 'GET':
+        # Retorna o conteúdo do arquivo 'index.html'
+        return render_template('index.html')
 
 if __name__ == '__main__':
-    # Desabilitar suporte a GPU
-    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-    # Iniciar o servidor Flask
     app.run()
