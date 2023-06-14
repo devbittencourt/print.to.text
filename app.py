@@ -1,33 +1,39 @@
-from flask import Flask, request, jsonify, render_template
+import os
 import cv2
-from keras_ocr import pipeline
+import keras_ocr
+from flask import Flask, request
 
+# Configurar Flask
 app = Flask(__name__)
 
-# Cria uma instância do pipeline fora da função para reutilização
-pipeline_instance = pipeline.Pipeline()
+# Definir rota para o endpoint
+@app.route('/', methods=['POST'])
+def extract_text():
+    # Verificar se há um arquivo de imagem na requisição
+    if 'image' not in request.files:
+        return 'Nenhuma imagem encontrada', 400
 
-@app.route('/', methods=['GET', 'POST'])
-def process_image():
-    if request.method == 'POST':
-        # Verifica se foi fornecido o arquivo de imagem
-        if 'image' not in request.files:
-            return jsonify({'error': 'Nenhum arquivo de imagem fornecido.'})
+    # Carregar o modelo OCR
+    pipeline = keras_ocr.pipeline.Pipeline()
 
-        image = request.files['image']
-        
-        # Lê a imagem a partir do arquivo e converte para RGB
-        image_data = cv2.cvtColor(cv2.imdecode(np.frombuffer(image.read(), np.uint8), -1), cv2.COLOR_BGR2RGB)
+    # Ler a imagem e converter para RGB
+    image = request.files['image'].read()
+    image = cv2.imdecode(np.frombuffer(image, np.uint8), cv2.IMREAD_COLOR)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # Utiliza o Keras-OCR pipeline para realizar a leitura da imagem e extrair o texto
-        result = pipeline_instance.recognize([image_data])
+    # Processar a imagem para extrair o texto
+    images = [image]
+    images = [tools.read(image) for image in images]
+    predictions = pipeline.recognize(images)
 
-        # Retorna o texto extraído como resposta em formato JSON
-        return jsonify({'text': result[0]})
+    # Extrair o texto das predições
+    text = [text for text in predictions[0][0] if text]
 
-    elif request.method == 'GET':
-        # Retorna o conteúdo do arquivo 'index.html'
-        return render_template('index.html')
+    return '\n'.join(text)
 
 if __name__ == '__main__':
+    # Desabilitar suporte a GPU
+    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+    # Iniciar o servidor Flask
     app.run()
