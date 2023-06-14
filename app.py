@@ -12,7 +12,10 @@ ocr_pipeline = pipeline.Pipeline()
 
 @app.route('/')
 def process_image():
-    image_base64 = request.form.get('image')
+    image_base64 = request.args.get('image')
+
+    if image_base64 is None:
+        return jsonify({'error': 'Image data not provided'})
 
     # Decodifica a string base64 em uma matriz de imagem
     image_data = base64.b64decode(image_base64)
