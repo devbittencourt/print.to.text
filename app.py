@@ -12,14 +12,13 @@ ocr_pipeline = pipeline.Pipeline()
 
 @app.route('/')
 def process_image():
-    image_base64 = request.args.get('image')
+    image_file = request.files['image']
 
-    if image_base64 is None:
+    if image_file is None:
         return jsonify({'error': 'Image data not provided'})
 
-    # Decodifica a string base64 em uma matriz de imagem
-    image_data = base64.b64decode(image_base64)
-    image = Image.open(io.BytesIO(image_data))
+    # Lê a imagem a partir do arquivo
+    image = Image.open(image_file)
 
     # Realiza a leitura da imagem usando OCR
     result = ocr_pipeline.recognize([image])
