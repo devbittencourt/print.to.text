@@ -48,12 +48,15 @@
                                         if (response.ok) {
                                             alert('Imagem enviada com sucesso!');
                                         } else {
-                                            alert('Ocorreu um erro ao enviar a imagem.');
+                                            response.text().then(function (errorMessage) {
+                                                alert('Ocorreu um erro ao enviar a imagem: ' + errorMessage);
+                                            }).catch(function (error) {
+                                                alert('Ocorreu um erro ao enviar a imagem.');
+                                            });
                                         }
                                     })
                                     .catch(function (error) {
-                                        alert('Ocorreu um erro ao enviar a imagem.');
-                                        console.error(error);
+                                        alert('Ocorreu um erro ao enviar a imagem: ' + error.message);
                                     });
                             };
 
@@ -95,12 +98,15 @@
                             if (response.ok) {
                                 alert('Imagem enviada com sucesso!');
                             } else {
-                                alert('Ocorreu um erro ao enviar a imagem.');
+                                response.text().then(function (errorMessage) {
+                                    alert('Ocorreu um erro ao enviar a imagem: ' + errorMessage);
+                                }).catch(function (error) {
+                                    alert('Ocorreu um erro ao enviar a imagem.');
+                                });
                             }
                         })
                         .catch(function (error) {
-                            alert('Ocorreu um erro ao enviar a imagem.');
-                            console.error(error);
+                            alert('Ocorreu um erro ao enviar a imagem: ' + error.message);
                         });
                 };
 
