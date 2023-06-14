@@ -7,11 +7,13 @@ from flask import Flask, request
 app = Flask(__name__)
 
 # Definir rota para o endpoint
-@app.route('/')
-def extract_text():
-    # Verificar se há um arquivo de imagem na requisição
-    if 'image' not in request.files:
-        return 'Nenhuma imagem encontrada', 400
+@app.route('/', methods=['GET', 'POST'])
+def process_image():
+    if request.method == 'POST':
+        # Verifica se foi fornecido o arquivo de imagem
+        if 'image' not in request.files:
+            return jsonify({'error': 'Nenhum arquivo de imagem fornecido.'})
+
 
     # Carregar o modelo OCR
     pipeline = keras_ocr.pipeline.Pipeline()
