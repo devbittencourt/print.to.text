@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+import cv2
 from keras_ocr import pipeline
 
 app = Flask(__name__)
@@ -15,14 +16,14 @@ def process_image():
 
         image = request.files['image']
         
-        # Lê a imagem a partir do arquivo
-        image_data = image.read()
+        # Lê a imagem a partir do arquivo e converte para RGB
+        image_data = cv2.cvtColor(cv2.imdecode(np.frombuffer(image.read(), np.uint8), -1), cv2.COLOR_BGR2RGB)
 
         # Utiliza o Keras-OCR pipeline para realizar a leitura da imagem e extrair o texto
-        result = pipeline_instance.recognize(image_data)
+        result = pipeline_instance.recognize([image_data])
 
         # Retorna o texto extraído como resposta em formato JSON
-        return jsonify({'text': result})
+        return jsonify({'text': result[0]})
 
     elif request.method == 'GET':
         # Retorna o conteúdo do arquivo 'index.html'
