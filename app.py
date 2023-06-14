@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 from keras_ocr import pipeline
+import os
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 app = Flask(__name__)
 ocr_pipeline = pipeline.Pipeline()
