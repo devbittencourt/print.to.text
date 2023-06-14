@@ -34,7 +34,7 @@
                                 canvas.width = image.width;
                                 canvas.height = image.height;
                                 ctx.drawImage(image, 0, 0);
-                                var base64Data = canvas.toDataURL('image/png');
+                                var base64Data = canvas.toDataURL('image/png').replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
                                 
                                 // Envia a imagem para o servidor
                                 fetch('/', {
