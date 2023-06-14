@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from keras_ocr import pipeline
 
 app = Flask(__name__)
@@ -24,8 +24,7 @@ def process_image():
 
     elif request.method == 'GET':
         # Retorna o conteúdo do arquivo 'index.html'
-        with open('index.html', 'r') as file:
-            return file.read()
+        return render_template('index.html')
 
 if __name__ == '__main__':
     app.run()
