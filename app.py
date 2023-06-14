@@ -7,7 +7,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 # Definir rota para o endpoint
-@app.route('/', methods=['POST'])
+@app.route('/')
 def extract_text():
     # Verificar se há um arquivo de imagem na requisição
     if 'image' not in request.files:
