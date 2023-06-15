@@ -1,41 +1,40 @@
-import os
-import cv2
-import numpy as np
-from keras_ocr import pipeline, tools
-from flask import Flask, request
+from flask import Flask, render_template, request
+from PIL import ImageGrab, Image
+import pytesseract
+import base64
 
-# Configurar Flask
 app = Flask(__name__)
 
-# Definir rota para o endpoint
+caminho = r"C:\Program Files\Tesseract-OCR"
+pytesseract.pytesseract.tesseract_cmd = caminho + r"\tesseract.exe"
+
+def extract_text_from_image(img_path):
+    img = Image.open(img_path)
+    text = pytesseract.image_to_string(img)
+    return text
+
 @app.route('/', methods=['GET', 'POST'])
-def process_image():
-    if request.method == 'POST':
-        # Verifica se foi fornecido o arquivo de imagem
-        if 'image' not in request.files:
-            return jsonify({'error': 'Nenhum arquivo de imagem fornecido.'})
+def show_image():
+    if request.method == 'POST' and 'image_data' in request.form:
+        image_data = request.form['image_data']
+        img_data = base64.b64decode(image_data.split(',')[1])
 
-    # Carregar o modelo OCR
-    pipeline = pipeline.Pipeline()
+        img_path = 'static/clipboard_image.png'
+        with open(img_path, 'wb') as f:
+            f.write(img_data)
 
-    # Ler a imagem e converter para RGB
-    image = request.files['image'].read()
-    image = cv2.imdecode(np.fromstring(image, np.uint8), cv2.IMREAD_COLOR)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        extracted_text = extract_text_from_image(img_path)
+        return render_template('index.html', img_path=img_path, text=extracted_text)
+    else:
+        img = ImageGrab.grabclipboard()
+        img_path = 'static/clipboard_image.png'
 
-    # Processar a imagem para extrair o texto
-    images = [image]
-    images = [tools.read(image) for image in images]
-    predictions = pipeline.recognize(images)
-
-    # Extrair o texto das predições
-    text = [text for text in predictions[0][0] if text]
-
-    return '\n'.join(text)
+        if img is not None:
+            img.save(img_path)
+            extracted_text = extract_text_from_image(img_path)
+            return render_template('index.html', img_path=img_path, text=extracted_text)
+        else:
+            return render_template('index.html', img_path=None, text=None)
 
 if __name__ == '__main__':
-    # Desabilitar suporte a GPU
-    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-    # Iniciar o servidor Flask
     app.run()
