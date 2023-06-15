@@ -1,14 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Processamento de Imagens com OCR</title>
+    <title>PRINT 2 TEXT</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function handlePaste(e) {
+            var items = e.clipboardData.items;
+
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf("image") !== -1) {
+                    var blob = items[i].getAsFile();
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        $.post("/", {image_data: event.target.result}, function() {
+                            window.location.reload();
+                        });
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            }
+        }
+
+        document.addEventListener("paste", handlePaste);
+    </script>
 </head>
 <body>
-    <h1>Processamento de Imagens com OCR</h1>
-
-    <form action="/" method="post" enctype="multipart/form-data">
-        <input type="file" name="image">
-        <input type="submit" value="Enviar">
-    </form>
+    <h1>PRINT 2 TEXT</h1>
+    <img src="{{ img_path }}" alt="Clipboard Image">
+    <h2>Extracted Text:</h2>
+    <p>{{ text }}</p>
 </body>
 </html>
